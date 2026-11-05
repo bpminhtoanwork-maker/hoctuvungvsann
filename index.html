@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PolyLang Flashcard - HSK Multi-Language</title>
+  <!-- Tailwind CSS & FontAwesome -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body id="app-body" class="bg-slate-900 text-slate-800 font-sans min-h-screen flex flex-col bg-cover bg-center bg-fixed transition-all duration-500">
+
+  <!-- Header & Navigation (3 Tabs) -->
+  <header class="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-10">
+    <div class="max-w-4xl mx-auto px-4 flex justify-between items-center h-16">
+      <h1 class="text-xl font-bold text-indigo-600">
+        <i class="fa-solid fa-layer-group mr-2"></i>PolyLang HSK
+      </h1>
+      <nav class="flex space-x-4 md:space-x-6 items-center">
+        <button id="btn-tab-input" onclick="switchTab('input')" class="py-4 px-2 tab-active transition-colors text-xs md:text-base font-semibold">
+          <i class="fa-solid fa-pen-to-square mr-1"></i> Nhập dữ liệu
+        </button>
+        <button id="btn-tab-quiz" onclick="switchTab('quiz')" class="py-4 px-2 text-slate-500 hover:text-indigo-600 transition-colors text-xs md:text-base font-semibold">
+          <i class="fa-solid fa-clone mr-1"></i> Flashcard
+        </button>
+        <button id="btn-tab-background" onclick="switchTab('background')" class="py-4 px-2 text-slate-500 hover:text-indigo-600 transition-colors text-xs md:text-base font-semibold">
+          <i class="fa-solid fa-image mr-1"></i> Đổi nền
+        </button>
+        <button onclick="setGroqKey()" class="text-slate-500 hover:text-indigo-600 px-2 py-1 text-xs md:text-sm font-semibold transition-colors" title="Cài đặt Groq API Key">
+          <i class="fa-solid fa-key"></i>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-4 py-6 flex-1 w-full space-y-6">
+
+    <!-- ================= TAB 1: NHẬP VÀ QUẢN LÝ DỮ LIỆU ================= -->
+    <section id="tab-input" class="space-y-6">
+      
+      <!-- Form nhập từ thủ công & Tích hợp Groq AI -->
+      <div class="bg-white/90 backdrop-blur-md p-6 rounded-xl shadow-lg border border-slate-200/60">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-lg font-bold text-slate-700 flex items-center">
+            <i class="fa-solid fa-plus-circle text-indigo-600 mr-2"></i> Thêm từ vựng mới
+          </h2>
+          <span class="text-xs text-slate-500"><i class="fa-solid fa-circle-check text-emerald-500 mr-1"></i>Đã sẵn sàng Groq AI</span>
+        </div>
+
+        <form id="vocab-form" onsubmit="addVocabulary(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-slate-700 mb-1">Tiếng Việt (*)</label>
+            <div class="flex gap-2">
+              <input type="text" id="vi" required placeholder="Ví dụ: Xin chào" class="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-400 outline-none bg-white">
+              <button type="button" id="btn-ai-translate" onclick="translateWithGroq()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-lg text-xs font-semibold whitespace-nowrap shadow-sm transition-colors flex items-center gap-1.5">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> AI Tự động điền
+              </button>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-1">Nhập tiếng Việt và bấm AI Tự động điền để hệ thống tự sinh chữ Hán, Pinyin, Anh, Đức và HSK.</p>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Tiếng Trung (Hanzi) (*)</label>
+            <input type="text" id="zh" required placeholder="Ví dụ: 你好" class="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-400 outline-none bg-white">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Phiên âm (Pinyin)</label>
+            <input type="text" id="pinyin" placeholder="Ví dụ: nǐ hǎo" class="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-400 outline-none bg-white">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Tiếng Anh (*)</label>
+            <input type="text" id="en" required placeholder="Ví dụ: Hello" class="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-400 outline-none bg-white">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Tiếng Đức (*)</label>
+            <input type="text" id="de" required placeholder="Ví dụ: Hallo" class="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-400 outline-none bg-white">
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-slate-700 mb-1">Cấp độ HSK (*)</label>
+            <select id="hsk" class="w-full border rounded-lg p-2.5 bg-white focus:ring-2 focus:ring-indigo-400 outline-none">
+              <option value="HSK1">HSK 1</option>
+              <option value="HSK2">HSK 2</option>
+              <option value="HSK3">HSK 3</option>
+              <option value="HSK4">HSK 4</option>
+              <option value="HSK5">HSK 5</option>
+              <option value="HSK6">HSK 6</option>
+            </select>
+          </div>
+          <div class="md:col-span-2 pt-2">
+            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-lg transition-colors shadow">
+              <i class="fa-solid fa-save mr-1"></i> Lưu từ vựng vào bộ nhớ
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Công cụ quản lý kho từ -->
+      <div class="bg-slate-900/90 backdrop-blur-md text-white border border-slate-800 p-6 rounded-xl flex flex-col md:flex-row items-center justify-between gap-4 shadow-lg">
+        <div>
+          <h3 class="font-bold"><i class="fa-solid fa-database
